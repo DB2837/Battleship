@@ -19,64 +19,61 @@ class Gameboard {
       direction === "horizontal" &&
       coordinate.y + shipLength > this.board.length
     )
-      return;
+      return false;
     if (
       direction === "vertical" &&
       coordinate.x + shipLength > this.board.length
     )
-      return;
+      return false;
     if (
       coordinate.x < 0 ||
       coordinate.y < 0 ||
       coordinate.x > this.dimension - 1 ||
       coordinate.y > this.dimension - 1
     )
-      return;
+      return false;
 
     switch (direction) {
-      case "horizontal":
-        {
-          for (let i = 0; i < shipLength; i++) {
-            if (
-              this.board[coordinate.x][coordinate.y + i].status === "occupied"
-            ) {
-              return;
-            }
+      case "horizontal": {
+        for (let i = 0; i < shipLength; i++) {
+          if (
+            this.board[coordinate.x][coordinate.y + i].status === "occupied"
+          ) {
+            return false;
           }
-
-          const ship = new Ship(shipLength);
-          for (let i = 0; i < shipLength; i++) {
-            ship.body[i] = this.board[coordinate.x][coordinate.y + i];
-            ship.body[i].setStatusOccupied();
-          }
-
-          ship.coordinate = coordinate;
-          ship.direction = direction;
-          this.shipContainer.push(ship);
         }
 
-        break;
-      case "vertical":
-        {
-          for (let i = 0; i < shipLength; i++) {
-            if (
-              this.board[coordinate.x + i][coordinate.y].status === "occupied"
-            ) {
-              return;
-            }
-          }
-
-          const ship = new Ship(shipLength);
-          for (let i = 0; i < shipLength; i++) {
-            ship.body[i] = this.board[coordinate.x + i][coordinate.y];
-            ship.body[i].setStatusOccupied();
-          }
-          ship.coordinate = coordinate;
-          ship.direction = direction;
-          this.shipContainer.push(ship);
+        const ship = new Ship(shipLength);
+        for (let i = 0; i < shipLength; i++) {
+          ship.body[i] = this.board[coordinate.x][coordinate.y + i];
+          ship.body[i].setStatusOccupied();
         }
 
-        break;
+        ship.coordinate = coordinate;
+        ship.direction = direction;
+        this.shipContainer.push(ship);
+        return true;
+      }
+
+      case "vertical": {
+        for (let i = 0; i < shipLength; i++) {
+          if (
+            this.board[coordinate.x + i][coordinate.y].status === "occupied"
+          ) {
+            return false;
+          }
+        }
+
+        const ship = new Ship(shipLength);
+        for (let i = 0; i < shipLength; i++) {
+          ship.body[i] = this.board[coordinate.x + i][coordinate.y];
+          ship.body[i].setStatusOccupied();
+        }
+        ship.coordinate = coordinate;
+        ship.direction = direction;
+        this.shipContainer.push(ship);
+        return true;
+      }
     }
   }
 
