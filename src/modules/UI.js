@@ -1,53 +1,34 @@
+import Square from "./square";
+
 class UI {
+  static boardCounter = 0;
+
   static generateSquare() {
     const square = document.createElement("div");
     square.classList.add("square-item");
-
-    /* square.addEventListener(
-      "onmouseover",
-      (e) => {
-        console.log(e.target);
-      },
-      { capture: true }
-    ); */
 
     return square;
   }
 
   static createShip(length) {
     const ship = document.createElement("div");
+    ship.dataset.direction = "horizontal";
     ship.setAttribute("draggable", true);
-    ship.classList.add("ship-item");
-    ship.classList.add(`number-${length}`);
+    ship.classList.add("ship-item-horizontal");
 
     for (let i = 0; i < length; i++) {
       const square = UI.generateSquare();
       square.dataset.index = i;
-      /*  square.setAttribute("draggable", true); */
+      square.style.backgroundColor = "green";
       ship.appendChild(square);
     }
-
-    function dragStart(e) {
-      console.log("dragStart");
-      console.log(e.target);
-      setTimeout(() => {
-        this.classList.add("invisible");
-      }, 0);
-    }
-
-    function dragEnd() {
-      console.log("dragEnd");
-      this.classList.remove("invisible");
-    }
-
-    ship.addEventListener("dragstart", dragStart);
-    ship.addEventListener("dragend", dragEnd);
 
     return ship;
   }
 
   static createGrid(dim) {
     const board = document.createElement("section");
+    board.dataset.id = UI.boardCounter;
     board.classList.add("game-board");
 
     const root = document.documentElement;
@@ -55,75 +36,53 @@ class UI {
 
     for (let i = 0; i < dim ** 2; i++) {
       const square = UI.generateSquare();
-      square.dataset.id = i + 1;
+      square.dataset.id = i;
+      square.dataset.board = UI.boardCounter;
       board.appendChild(square);
     }
 
-    /* function dragOver(e) {
-      e.preventDefault();
-      console.log("dragOver");
-    }
+    ++UI.boardCounter;
 
-    function dragEnter(e) {
-      e.preventDefault();
-      console.log("dragEnter");
-    }
-
-    function dragLeave() {
-      console.log("dragLeave");
-    }
-
-    function dragDrop(e) {
-      console.log("dragDrop");
-      console.log(e.target);
-    }
-
-    board.addEventListener("dragover", dragOver);
-    board.addEventListener("dragenter", dragEnter);
-    board.addEventListener("dragleave", dragLeave);
-    board.addEventListener("drop", dragDrop);
- */
     return board;
   }
 
-  static askShipPosition(length) {
-    const x = +prompt(
-      `insert row coordinate (0-9) for ship whit ${length} squares length : `,
-      ""
-    );
-    const y = +prompt(
-      `insert column coordinate (0-9) for ship whit ${length} squares length: `,
-      ""
-    );
+  static setAIpossibleChoices(gameboard, AIplayer) {
+    let freeSquares = [];
+    for (let i = 0; i < gameboard.dimension; i++) {
+      for (let j = 0; j < gameboard.dimension; j++) {
+        freeSquares.push(gameboard.board[i][j]);
+      }
+    }
 
-    let direction = prompt(
-      'insert "1" to place the ship horizontally, "0" to place it vertically: ',
-      ""
-    );
-
-    if (direction === "0") direction = "vertical";
-    direction = "horizontal";
-
-    const coordinate = { x, y };
-
-    return { direction, coordinate };
+    AIplayer.freeSquares = freeSquares;
   }
 
-  /* static createShip(board, length) {
-    const shipInfo = UI.askShipPosition(length);
-    console.log(shipInfo.direction);
-    console.log(shipInfo.coordinate);
-    console.log(length);
-    board.placeShip(shipInfo.direction, shipInfo.coordinate, length);
-  } */
+  static renderVisualEffects(gameboard, DOMboard) {
+    for (let i = 0; i < gameboard.dimension; i++) {
+      for (let j = 0; j < gameboard.dimension; j++) {
+        if (gameboard.board[i][j].status === "occupied" && gameboard.id === 1) {
+          DOMboard.children[
+            +[i.toString() + j.toString()]
+          ].style.backgroundColor = "white";
+        }
+        if (gameboard.board[i][j].status === "occupied" && gameboard.id === 0) {
+          DOMboard.children[
+            +[i.toString() + j.toString()]
+          ].style.backgroundColor = "green";
+        }
 
-  static renderShipsOnGrid(board) {
-    board.shipContainer.forEach((ship) => {
-      for (let i = 0; i < ship.body.length; i++) {
-        const square = document.querySelector(`[data-id='${ship.body[i].id}']`);
-        square.style.backgroundColor = "green";
+        if (gameboard.board[i][j].status === "hit") {
+          DOMboard.children[
+            +[i.toString() + j.toString()]
+          ].style.backgroundColor = "gray";
+        }
+        if (gameboard.board[i][j].status === "hitAndOccupied") {
+          DOMboard.children[
+            +[i.toString() + j.toString()]
+          ].style.backgroundColor = "red";
+        }
       }
-    });
+    }
   }
 }
 
