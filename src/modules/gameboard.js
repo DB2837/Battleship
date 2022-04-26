@@ -2,7 +2,9 @@ import Ship from "./ship";
 import Square from "./square";
 
 class Gameboard {
+  static id = 0;
   constructor(dimension) {
+    this.id = Gameboard.id++;
     this.dimension = dimension;
     this.shipContainer = [];
     this.board = [];
@@ -77,16 +79,52 @@ class Gameboard {
     }
   }
 
-  placeShipsRandom() {}
+  emptyShipContainer() {
+    this.shipContainer = [];
+  }
+
+  placeRandomShip(ship) {
+    const x = Math.floor(Math.random() * (this.dimension + 1));
+    const y = Math.floor(Math.random() * (this.dimension + 1));
+    const vertical = Math.random() > 0.5;
+    ship.coordinate = { x, y };
+    if (vertical) {
+      ship.direction = "vertical";
+    } else {
+      ship.direction = "horizontal";
+    }
+
+    const isPlaced = this.placeShip(
+      ship.direction,
+      ship.coordinate,
+      ship.body.length
+    );
+
+    if (!isPlaced) {
+      this.placeRandomShip(ship);
+    }
+  }
+
+  placeRandomFleet(shipsArray) {
+    for (const ship of shipsArray) {
+      this.placeRandomShip(ship);
+    }
+  }
 
   reciveAttack(coordinate) {
-    if (this.board[coordinate.x][coordinate.y].status === "hit") return;
-    this.board[coordinate.x][coordinate.y].setStatusHit();
-    this.shipContainer.forEach((ship, index) => {
-      if (ship.isSunk()) {
-        this.shipContainer.splice(index, 1);
-      }
-    });
+    if (
+      this.board[coordinate.x][coordinate.y].status === "hit" ||
+      this.board[coordinate.x][coordinate.y].status === "hitAndOccupied"
+    )
+      return;
+    if (this.board[coordinate.x][coordinate.y].status === "occupied") {
+      this.board[coordinate.x][coordinate.y].setStatusHitAndOccupied();
+      this.shipContainer.forEach((ship, index) => {
+        if (ship.isSunk()) {
+          this.shipContainer.splice(index, 1);
+        }
+      });
+    } else this.board[coordinate.x][coordinate.y].setStatusHit();
   }
 }
 
