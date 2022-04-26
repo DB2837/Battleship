@@ -10,7 +10,7 @@ class Ship {
   }
 
   isSunk() {
-    return this.body.every((element) => element.status === "hit");
+    return this.body.every((element) => element.status === "hitAndOccupied");
   }
 }
 
